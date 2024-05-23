@@ -1,0 +1,5 @@
+1 -> Score Printing
+2 -> Winning Condition
+3 -> COl ROWS wala scene yani aik ke end pe ja ke start se ana
+4 -> Game Start hote hi right ki tarf move karne lag jaye
+ 

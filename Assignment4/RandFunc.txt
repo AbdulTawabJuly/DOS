@@ -1,0 +1,25 @@
+[org 0x0100]
+
+Start:
+RANDSTART:
+   mov ah, 00h  ; interrupts to get system time        
+   int 1ah      ; CX:DX now hold number of clock ticks since midnight      
+                ; lets just take the lower bits of DL for a start..
+   mov bh, 57   ; set limit to 57 (ASCII for 9) 
+   mov ah, dl  
+   cmp ah, bh   ; compare with value in  DL,      
+   ja RANDSTART ; if more, regenerate. if not, continue... 
+
+   mov bh, 49   ; set limit to 48 (ASCII FOR 0)
+   mov ah, dl   
+   cmp ah, bh   ; compare with value in DL
+   jb RANDSTART ; if less, regenerate.   
+
+
+   ; if not, this is what we need 
+   mov ah, 2h   ; call interrupt to display a value in DL
+   int 21h    
+
+
+mov ax, 0x4c00
+int 21h

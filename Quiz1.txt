@@ -1,0 +1,26 @@
+[org 0x0100]
+
+mov ax,0
+mov cx,0
+mov dx,[size]
+sub dx,2
+
+l1:
+mov ax,byte[arr+cx]
+mov bx,byte[arr+dx]
+cmp ax,bx
+jne end
+jmp equal
+
+equal:
+add cx,1
+sub dx,1
+cmp cx,dx
+jne l1
+end:
+mov ax,0x4c00
+int 0x21
+
+
+arr: db 1,1,2,1,1,-1
+size: db 6 

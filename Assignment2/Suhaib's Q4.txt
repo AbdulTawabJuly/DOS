@@ -1,0 +1,52 @@
+[org 0x100]
+
+mov ax,3                     ;ax will be the starting bits
+mov bx,4                     ;bx will be the number of bits including starting bit
+mov [start],ax               
+add bx,ax                    ;this will calculate the border i.e. the bit before which all bits should be 0
+mov [end],bx
+mov cx,0
+mov di,0
+mov si,[size]
+
+loop1:
+mov ax,0
+mov dx,[myArray+si-2]         ;first two bytes will e loaded in dx
+cmp si,0
+jz endd 
+
+loop2:
+cmp cx,[start]          ;compare current bit with the starting bit
+jb JustShift                  ;if starting bit is not reached yet
+cmp cx,[end]
+jae JustShift                 ;if the ending bit has been reached
+shr di,1                      ;in the space where alterations are required we will just shift right so that we have 0's there
+shr dx,1
+
+c:
+inc cx
+inc ax
+cmp ax,0x0010                 ;if the current word has been traversed completely 
+jz moveBack
+jmp loop2
+
+moveBack:
+mov [myArray+si-2],di         ;at the end the altered word will be replaced be the actual one
+cmp cx,[end]
+jae endd                      ;if current bit is greater than or equal the ending bit 
+dec si
+dec si                         ;two time decrement because we are skipping a word
+jmp loop1
+
+JustShift: 
+shr dx,1           ;it will copy dx in di exactly
+rcr di,1
+jmp c
+	
+endd: int 21h
+
+
+myArray:dw 20,30,4,5,6,7,8,9,10,11,12,13,14,15,16,0x873A
+size : dw 32
+start: dw 0
+end: dw 0

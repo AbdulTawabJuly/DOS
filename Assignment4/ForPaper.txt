@@ -1,0 +1,167 @@
+[org 0x0100] 
+
+jmp Start 
+
+ticks : dw 0 
+prev : dw 0
+CurrPos : dw 0
+ColRowCheck : dw 1
+DirectionFlag : dw 3
+GameFlag : dw 0
+oldkbisr : dd 0 
+oldtimer : dd 0
+InputKey: 
+ 	push ax 
+	
+ 	in al, 0x60 
+ 	cmp al, 0x48	; Up Key 
+ 	jne DownCompare
+ 	mov word [cs:DirectionFlag], 1
+ 	jmp Pop2 
+DownCompare:
+	cmp al, 0x50	; Down Key
+ 	jne RightCompare 
+ 	mov word [cs:DirectionFlag], 2
+ 	jmp Pop2 
+RightCompare:
+	cmp al, 0x4D	; Right Key
+ 	jne LeftCompare 
+ 	mov word [cs:DirectionFlag], 3
+ 	jmp Pop2
+LeftCompare:
+	cmp al, 0x4B	; Left Key
+ 	jne NoMatch 
+ 	mov word [cs:DirectionFlag], 4
+ 	jmp Pop2
+NoMatch:
+ 	pop ax 
+ 	jmp far [cs:oldkbisr] 
+Pop2:
+ 	mov al, 0x20 
+ 	out 0x20, al 
+ 	pop ax 
+ 	iret 
+Clock:
+	push ax
+	cmp word[cs:GameFlag], 2
+	je Nomatch
+	cmp word[cs:GameFlag], 3
+	je Nomatch
+ 	inc word [cs:ticks]
+	cmp word [cs:ticks], 18
+	jne  Nomatch
+
+ 	cmp word [cs:DirectionFlag], 1 
+ 	je Up 
+	cmp word [cs:DirectionFlag], 2
+	je Down
+	cmp word [cs:DirectionFlag], 3
+	je Right
+	cmp word [cs:DirectionFlag], 4
+	je Left
+	jmp Nomatch
+Nomatch:
+ 	mov al, 0x20 
+ 	out 0x20, al
+ 	pop ax 
+ 	iret 
+;-------------------------------------------------------------------
+Up:
+	mov [prev], di
+	sub di, 160
+	cmp di, 320
+	jb L1
+	jmp U1
+L1:
+	add di, 3520
+U1:	
+	jmp Print
+;-------------------------------------------------------------------
+Down:
+	mov [prev], di
+	add di, 160
+	cmp di, 3838
+	ja G1
+	jmp D1
+G1:
+	sub di, 3520
+D1:
+	jmp Print
+;-------------------------------------------------------------------
+Right:
+	mov [prev], di
+	add di, 2
+	inc word[cs:ColRowCheck]
+	cmp word[cs:ColRowCheck], 79
+	ja G2
+	jmp R1
+G2:
+	sub di, 156
+	mov word[cs:ColRowCheck], 1
+R1:
+	jmp Print
+;-------------------------------------------------------------------
+Left: 
+	mov [prev], di
+	sub di, 2
+	dec word[cs:ColRowCheck]
+	cmp word[cs:ColRowCheck], 1
+	jb L2
+	jmp Le1
+L2
+	add di, 156
+	mov word[cs:ColRowCheck], 79
+Le1:
+	jmp Print
+;-------------------------------------------------------------------
+Print: 
+ 	push di 
+ 	call PrintAsterik
+	jmp Nomatch
+Start:
+	
+	xor ax, ax 
+	xor bx, bx
+	xor di, di
+ 	mov es, ax 
+	mov di ,322
+
+ 	mov ax, [es:9*4] 
+ 	mov [oldkbisr], ax 
+ 	mov ax, [es:9*4+2] 
+ 	mov [oldkbisr+2], ax 
+
+	mov ax, [es:8*4] 
+ 	mov [oldtimer], ax 
+ 	mov ax, [es:8*4+2] 
+ 	mov [oldtimer+2], ax 
+
+ 	cli 
+ 	mov word [es:9*4], InputKey
+ 	mov [es:9*4+2], cs
+ 	mov word [es:8*4], Clock
+ 	mov [es:8*4+2], cs 
+ 	sti 	
+
+Loop1:
+	mov ah, 0
+	int 0x16
+	cmp al, 0x1b
+	jne Loop1
+Ending:
+	mov ax, [oldkbisr]
+	mov bx, [oldkbisr+2]
+	cli
+	mov [es:9*4], ax
+	mov [es:9*4+2], bx
+	sti 
+	mov ax, [oldtimer]
+	mov bx, [oldtimer+2]
+	cli
+	mov [es:8*4], ax
+	mov [es:8*4+2], bx
+	sti 
+
+Exit:
+ 	mov ax, 0x4c00
+	int 0x21

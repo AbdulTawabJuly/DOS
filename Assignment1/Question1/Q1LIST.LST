@@ -1,0 +1,15 @@
+     1                                  [org 0x100]
+     2                                  
+     3 00000000 31C0                    xor ax,ax
+     4 00000002 B80100                  mov ax,1
+     5 00000005 050200                  add ax,2
+     6 00000008 050100                  add ax,1
+     7 0000000B BB1034                  mov bx, 0x3410
+     8 0000000E B8CBEE                  mov ax,0xEECB
+     9 00000011 01D8                    add ax,bx
+    10 00000013 31DB                    xor bx,bx
+    11 00000015 B80080                  mov ax,-32768
+    12 00000018 05FFFF                  add ax,-1
+    13 0000001B 31C0                    xor ax,ax
+    14 0000001D 2D0200                  sub ax,2
+    15                                  
