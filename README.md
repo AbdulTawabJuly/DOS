@@ -1,4 +1,3 @@
-# Not Just a Time Tracker
+# DOS
 
-Create an integrated web application that allows users to efficiently manage projects, track activities, and analyze performance through detailed reports and timesheets.
-
+Semester Work for COAL
